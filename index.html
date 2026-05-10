@@ -1,16 +1,202 @@
-/* 1. 텍스트 컬러: 완전한 검정 대신 짙은 브라운 톤 */
-body {
-    color: #4A4540; /* 짙은 흙색 */
-}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>평아정 - 평택 아파트 정보</title>
+    <!-- 구글 폰트: 나눔명조(감성) & 프리텐다드(가독성) -->
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700&family=Pretendard:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-warm: #FAF9F6;      /* 웜 화이트 배경 */
+            --sepia-point: #B07D62;  /* 테라코타 브라운 포인트 */
+            --text-main: #4A4540;    /* 짙은 흙색 텍스트 */
+            --card-bg: #ffffff;
+        }
 
-/* 2. 포인트 컬러 (버튼, 강조 효과 등): 따뜻한 테라코타 */
-.btn-primary, .stat-badge, .active-link {
-    background-color: #B07D62 !important; /* 테라코ta/부드러운 황토색 */
-    border-color: #B07D62 !important;
-    color: #ffffff; /* 텍스트는 화이트 */
-}
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg-warm);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
 
-/* 3. 카드 UI 및 보조 배경: 웜 화이트/미색 */
-.apt-card, .sub-section {
-    background-color: #FAF9F6; /* 아주 연한 베이지/웜 화이트 */
-}
+        /* --- 메인 히어로 섹션 (세피아 감성) --- */
+        .hero {
+            position: relative;
+            height: 65vh;
+            /* 아래 이미지 주소는 보편적인 가족/공원 느낌의 무료 이미지 예시입니다 */
+            background: linear-gradient(rgba(139, 115, 85, 0.3), rgba(139, 115, 85, 0.3)), 
+                        url('https://images.unsplash.com/photo-1543269664-76bc3997d9ea?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            filter: sepia(15%) contrast(95%); /* 라이트 세피아 필터 */
+        }
+
+        .hero h1 {
+            font-family: 'Nanum+Myeongjo', serif;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        /* --- 실시간 통계 바 (자동 합산 표시부) --- */
+        .stats-bar {
+            width: 80%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 50px;
+            display: flex;
+            justify-content: space-around;
+            margin: -40px auto 40px;
+            box-shadow: 0 10px 30px rgba(176, 125, 98, 0.1);
+            z-index: 10;
+            position: relative;
+        }
+
+        .stat-item span {
+            display: block;
+            color: var(--sepia-point);
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        /* --- 현장 리스트 카드 --- */
+        .container { width: 90%; max-width: 1100px; margin: 0 auto; }
+        
+        .apt-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .apt-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: 0.3s;
+        }
+
+        .apt-card:hover { transform: translateY(-8px); }
+
+        .apt-info { padding: 20px; }
+        
+        .badge {
+            background: var(--sepia-point);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        /* --- 관리자 패널 (기존 기능 유지) --- */
+        .admin-panel {
+            background: #eee;
+            padding: 20px;
+            margin-top: 50px;
+            border-radius: 15px;
+            border: 1px dashed #ccc;
+        }
+
+        button {
+            background: var(--sepia-point);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 메인 화면 -->
+    <section class="hero">
+        <h1>평택에서 찾는 우리 가족의 행복</h1>
+        <p>웅장한 조감도보다 따뜻한 일상이 있는 곳, 평아정이 함께합니다.</p>
+    </section>
+
+    <!-- 자동 합산 통계 바 -->
+    <div class="stats-bar">
+        <div class="stat-item">지금 진행 중인 현장 <span id="total-sites">0</span></div>
+        <div class="stat-item">함께할 총 세대 수 <span id="total-units">0</span></div>
+    </div>
+
+    <div class="container">
+        <h2 style="font-family: 'Nanum Myeongjo';">오늘의 추천 단지</h2>
+        <div class="apt-grid" id="apt-list">
+            <!-- 자바스크립트로 카드가 생성됩니다 -->
+        </div>
+
+        <!-- 관리자 기능 (운영진용) -->
+        <div class="admin-panel">
+            <h3>현장 관리 (운영진 전용)</h3>
+            <input type="text" id="apt-name" placeholder="현장명">
+            <input type="number" id="apt-units" placeholder="세대수">
+            <button onclick="addApt()">현장 추가하기</button>
+        </div>
+    </div>
+
+    <script>
+        // 데이터 관리 (기존 로직 유지)
+        let aptData = [
+            { name: "고덕 평화로운 공원 아파트", units: 1200 },
+            { name: "평택 따뜻한 가로등 마을", units: 850 }
+        ];
+
+        function render() {
+            const list = document.getElementById('apt-list');
+            const totalSites = document.getElementById('total-sites');
+            const totalUnits = document.getElementById('total-units');
+            
+            list.innerHTML = "";
+            let sumUnits = 0;
+
+            aptData.forEach((apt, index) => {
+                sumUnits += parseInt(apt.units);
+                list.innerHTML += `
+                    <div class="apt-card">
+                        <div class="apt-info">
+                            <span class="badge">모집 중</span>
+                            <h3>${apt.name}</h3>
+                            <p>규모: ${apt.units}세대</p>
+                            <button onclick="deleteApt(${index})" style="background:#ccc; font-size:12px;">삭제</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            totalSites.innerText = aptData.length;
+            totalUnits.innerText = sumUnits.toLocaleString();
+        }
+
+        function addApt() {
+            const name = document.getElementById('apt-name').value;
+            const units = document.getElementById('apt-units').value;
+            if(name && units) {
+                aptData.push({ name, units });
+                render();
+            }
+        }
+
+        function deleteApt(index) {
+            aptData.splice(index, 1);
+            render();
+        }
+
+        // 초기 실행
+        render();
+    </script>
+</body>
+</html>
